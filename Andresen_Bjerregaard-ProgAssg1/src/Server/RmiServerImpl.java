@@ -38,6 +38,6 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
 
     @Override
     public String getMessage(String name) {
-        return "Hello " +name;
+        return "Hello " + name;
     }
 }
