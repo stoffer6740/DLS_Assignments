@@ -1,3 +1,8 @@
+package Server;
+
+import Shared.RegistryConfig;
+import Shared.ServerConfig;
+
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -16,17 +21,17 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
         System.out.println("RMI server started");
 
         try { //special exception handler for registry creation
-            LocateRegistry.createRegistry(1099);
+            LocateRegistry.createRegistry(RegistryConfig.REGISTRY_PORT);
             System.out.println("java RMI registry created.");
         } catch (RemoteException e) {
             //do nothing, error means registry already exists
             System.out.println("java RMI registry already exists.");
         }
 
-        //Instantiate RmiServer
+        //Instantiate Server.RmiServer
         RmiServerImpl obj = new RmiServerImpl();
 
-        // Bind this object instance to the name "RmiServer"
+        // Bind this object instance to the name "Server.RmiServer"
         Naming.rebind(ServerConfig.SERVER_ADDRESS, obj);
         System.out.println("PeerServer bound in registry");
     }
