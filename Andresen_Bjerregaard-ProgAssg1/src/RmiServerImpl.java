@@ -12,11 +12,6 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
         super(0);
     }
 
-    @Override
-    public String getMessage() {
-        return "Hello world!";
-    }
-
     public static void main(String args[]) throws Exception {
         System.out.println("RMI server started");
 
@@ -29,11 +24,15 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
         }
 
         //Instantiate RmiServer
-
         RmiServerImpl obj = new RmiServerImpl();
 
         // Bind this object instance to the name "RmiServer"
-        Naming.rebind("//localhost/RmiServer", obj);
+        Naming.rebind(ServerConfig.SERVER_ADDRESS, obj);
         System.out.println("PeerServer bound in registry");
+    }
+
+    @Override
+    public String getMessage() {
+        return "Hello world!";
     }
 }

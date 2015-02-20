@@ -1,11 +1,18 @@
+import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 
 /**
  * Created by prep on 20-02-2015.
  */
 public class RmiClient {
-    public static void main(String[] args) throws Exception {
-        RmiServer obj = (RmiServer) Naming.lookup("//localhost/RmiServer");
-        System.out.println(obj.getMessage());
+    public static void main(String[] args) {
+        try {
+            RmiServer obj = (RmiServer) Naming.lookup(ServerConfig.SERVER_ADDRESS);
+            System.out.println(obj.getMessage());
+        } catch (NotBoundException | RemoteException | MalformedURLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }
