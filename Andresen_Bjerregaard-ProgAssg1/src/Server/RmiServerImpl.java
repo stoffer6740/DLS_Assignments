@@ -87,6 +87,13 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
     }
 
     @Override
+    public String exchangeRate(String sourceCurrency, String targetCurrency) {
+        DecimalFormat df = new DecimalFormat("###,###.##");
+
+        return df.format(currencyExchange.get(sourceCurrency + targetCurrency));
+    }
+
+    @Override
     public List<String> getCurrencies() {
         return currencyCache.getCurrencyList();
     }

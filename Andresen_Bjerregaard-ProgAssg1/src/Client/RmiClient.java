@@ -57,6 +57,7 @@ public class RmiClient {
                 scan.next();
             }
         }
+        System.out.println("Selected start currency: " + currencies.get(currFrom - 1).split(splitChar)[1]);
         String selectedFromCurrency = currencies.get(currFrom - 1).split(splitChar)[0];
 
         boolean secondCurrencyValid = false;
@@ -75,10 +76,12 @@ public class RmiClient {
                 scan.next();
             }
         }
+        System.out.println("Selected start currency: " + currencies.get(currTo - 1).split(splitChar)[1]);
         String selectedToCurrency = currencies.get(currTo - 1).split(splitChar)[0];
+        System.out.println("Current exchange rate: " + server.exchangeRate(selectedFromCurrency, selectedToCurrency));
 
         boolean amountValid = false;
-        System.out.println("The amount you want to convert");
+        System.out.println("Input the amount you want to convert");
         double amount = 0;
 
         while (!amountValid) {
@@ -90,7 +93,6 @@ public class RmiClient {
                 scan.next();
             }
         }
-
-        System.out.println(server.exchangeRate(selectedFromCurrency, selectedToCurrency, amount));
+        System.out.println("Total: " + server.exchangeRate(selectedFromCurrency, selectedToCurrency, amount));
     }
 }

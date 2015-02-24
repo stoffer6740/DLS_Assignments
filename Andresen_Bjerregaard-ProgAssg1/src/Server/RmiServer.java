@@ -11,5 +11,7 @@ import java.util.List;
 public interface RmiServer extends Remote {
     public String exchangeRate(String sourceCurrency, String targetCurrency, Double amount) throws RemoteException;
 
+    public String exchangeRate(String sourceCurrency, String targetCurrency) throws RemoteException;
+
     public List<String> getCurrencies() throws RemoteException;
 }
