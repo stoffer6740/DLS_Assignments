@@ -13,11 +13,11 @@ import java.rmi.RemoteException;
  */
 public class RmiClient {
     public static void main(String[] args) {
-        String name = "Klaus";
-
         try {
-            RmiServer obj = (RmiServer) Naming.lookup(ServerConfig.SERVER_ADDRESS);
-            System.out.println(obj.getMessage(name));
+            RmiServer server = (RmiServer) Naming.lookup(ServerConfig.SERVER_ADDRESS);
+
+
+
         } catch (NotBoundException | RemoteException | MalformedURLException e) {
             System.out.println(e.getMessage());
         }
