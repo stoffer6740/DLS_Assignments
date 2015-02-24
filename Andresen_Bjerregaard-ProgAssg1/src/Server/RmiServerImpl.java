@@ -21,6 +21,7 @@ import java.util.List;
 public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
     private static CurrencyLoader currencyCache = CurrencyLoader.INSTANCE;
     private static LinkedHashMap<String, Double> currencyExchange;
+    private static DecimalFormat df = new DecimalFormat("###,###.##");
 
     public RmiServerImpl() throws RemoteException {
         super(0);
@@ -81,15 +82,11 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
 
     @Override
     public String exchangeRate(String sourceCurrency, String targetCurrency, Double amount) {
-        DecimalFormat df = new DecimalFormat("###,###.##");
-
         return df.format(currencyExchange.get(sourceCurrency + targetCurrency) * amount);
     }
 
     @Override
     public String exchangeRate(String sourceCurrency, String targetCurrency) {
-        DecimalFormat df = new DecimalFormat("###,###.##");
-
         return df.format(currencyExchange.get(sourceCurrency + targetCurrency));
     }
 
