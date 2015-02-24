@@ -76,7 +76,7 @@ public class RmiClient {
                 scan.next();
             }
         }
-        System.out.println("Selected start currency: " + currencies.get(currTo - 1).split(splitChar)[1]);
+        System.out.println("Selected target currency: " + currencies.get(currTo - 1).split(splitChar)[1]);
         String selectedToCurrency = currencies.get(currTo - 1).split(splitChar)[0];
         System.out.println("Current exchange rate: " + server.exchangeRate(selectedFromCurrency, selectedToCurrency));
 
