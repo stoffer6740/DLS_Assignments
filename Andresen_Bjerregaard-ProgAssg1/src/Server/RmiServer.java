@@ -9,7 +9,7 @@ import java.util.List;
  * Created by prep on 20-02-2015.
  */
 public interface RmiServer extends Remote {
-    public Double exchangeRate(String sourceCurrency, String targetCurrency, Double amount) throws RemoteException;
+    public String exchangeRate(String sourceCurrency, String targetCurrency, Double amount) throws RemoteException;
 
     public List<String> getCurrencies() throws RemoteException;
 }

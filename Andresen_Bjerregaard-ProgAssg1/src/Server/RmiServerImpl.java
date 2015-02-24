@@ -11,6 +11,7 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
+import java.text.DecimalFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -79,9 +80,10 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
     }
 
     @Override
-    public Double exchangeRate(String sourceCurrency, String targetCurrency, Double amount) {
-        // TODO
-        return null;
+    public String exchangeRate(String sourceCurrency, String targetCurrency, Double amount) {
+        DecimalFormat df = new DecimalFormat("###,###.##");
+
+        return df.format(currencyExchange.get(sourceCurrency + targetCurrency) * amount);
     }
 
     @Override
