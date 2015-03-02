@@ -100,7 +100,7 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
     @Override
     public void scheduleUpdate(int minutes) {
         // could have used Quartz as an alternative
-        System.out.println("Updater scheduled to run every " + minutes + " minutes");
+        System.out.println("Updater scheduled to run every " + minutes + " minute(s)");
         scheduler.scheduleAtFixedRate(updater, minutes, minutes, TimeUnit.MINUTES);
     }
 
@@ -120,12 +120,16 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
 
     @Override
     public String addCorrectEndLetter(String input) {
-        if (isVowel(input.charAt(input.length() - 1)))
+        char lastCharacter = input.charAt(input.length() - 1);
+
+        if (isVowel(lastCharacter))
             return input + "r";
-        else if (input.charAt(input.length() - 1) == 'n')
-            return input;
-        else
-            return input + "s";
+        else switch (lastCharacter) {
+            case 'n':
+                return input;
+            default:
+                return input + "s";
+        }
     }
 
     @Override
@@ -137,6 +141,7 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
     public List<String> getCurrencies() {
         String splitChar = "\\$";
         int index = 1;
+
         return currencyCache.getCurrencyList()
                 .stream()
                 .sorted((s1, s2) -> s1.split(splitChar)[index].compareTo(s2.split(splitChar)[index]))

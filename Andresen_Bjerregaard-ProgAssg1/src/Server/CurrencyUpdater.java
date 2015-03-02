@@ -7,15 +7,18 @@ import java.util.Calendar;
  * Created by Administrator on 01-03-2015.
  */
 public class CurrencyUpdater implements Runnable {
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
     private int count = 1;
-    private Calendar cal = Calendar.getInstance();
-    private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
     @Override
     public void run() {
-        System.out.println("Update #" + count + " started " + sdf.format(cal.getTime()));
+        Calendar calStart = Calendar.getInstance();
+
+        System.out.println(String.format("%-19s %s", "Update #" + count + " started ", dateFormat.format(calStart.getTime())));
         RmiServerImpl.fillCurrencyCache();
-        System.out.println("Update #" + count + " completed " + sdf.format(cal.getTime()));
+
+        Calendar calEnd = Calendar.getInstance();
+        System.out.println(String.format("%-19s %s", "Update #" + count + " completed ", dateFormat.format(calEnd.getTime())));
         count++;
     }
 }
