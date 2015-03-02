@@ -13,9 +13,9 @@ public class CurrencyUpdater implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Update #" + count + " initialized on " + sdf.format(cal.getTime()));
+        System.out.println("Update #" + count + " started " + sdf.format(cal.getTime()));
         RmiServerImpl.fillCurrencyCache();
-        System.out.println("Update #" + count + " completed on " + sdf.format(cal.getTime()));
+        System.out.println("Update #" + count + " completed " + sdf.format(cal.getTime()));
         count++;
     }
 }
