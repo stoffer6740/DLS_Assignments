@@ -15,10 +15,8 @@ public enum CurrencyLoader {
     INSTANCE;
 
     private List<String> currencyList;
-    private LinkedHashMap<String, Double> currencyExchange;
 
     CurrencyLoader() {
-        currencyExchange = new LinkedHashMap<>();
         Charset defaultCharset = Charset.defaultCharset();
         // Path to the file containing the different currencies
         Path currencyPath = Paths.get("Currency");

@@ -10,18 +10,26 @@ import java.net.URL;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.server.RemoteServer;
+import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.text.DecimalFormat;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Created by prep on 20-02-2015.
  */
 public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private CurrencyUpdater updater = new CurrencyUpdater();
     private static CurrencyLoader currencyCache = CurrencyLoader.INSTANCE;
-    private static LinkedHashMap<String, Double> currencyExchange;
-    private static DecimalFormat df = new DecimalFormat("###,###.##");
+    private static HashMap<String, Double> currencyExchange;
 
     public RmiServerImpl() throws RemoteException {
         super(0);
@@ -46,52 +54,132 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
         System.out.println("PeerServer bound in registry");
 
         // Fetch currencies from yahoo
-        System.out.println("Updating currencies...");
+        System.out.println("Fetching initial currencies...");
         fillCurrencyCache();
-        System.out.println("Done updating currencies");
+        System.out.println("All currencies are up to date");
     }
 
-    private static void fillCurrencyCache() {
+    protected static void fillCurrencyCache() {
         String splitChar = "\\$";
         int arrayIndex = 0;
         List<String> currencies = currencyCache.getCurrencyList();
-        currencyExchange = new LinkedHashMap<>();
+        currencyExchange = new HashMap<>();
 
         for (String sourceCurrency : currencies) {
             for (String targetCurrency : currencies) {
-                String splitSourceCurr = sourceCurrency.split(splitChar)[arrayIndex];
-                String splitTargetCurr = targetCurrency.split(splitChar)[arrayIndex];
+                String splitSourceCurr = sourceCurrency.split(splitChar)[arrayIndex].trim();
+                String splitTargetCurr = targetCurrency.split(splitChar)[arrayIndex].trim();
                 String appendedCurrency = splitSourceCurr + splitTargetCurr;
 
-                String req = "http://quote.yahoo.com/d/quotes.cvs?s=" + appendedCurrency.toUpperCase() + "=X&f=l1&e=.cvs";
-                String exchangeValue = "";
-
-                try {
-                    URL url = new URL(req);
-                    BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-                    exchangeValue = in.readLine();
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                currencyExchange.put(appendedCurrency, Double.valueOf(exchangeValue));
+                Double value = fetchSingleCurrency(appendedCurrency);
+                currencyExchange.put(appendedCurrency, value);
             }
         }
     }
 
+    private static double fetchSingleCurrency(String currency) {
+        String req = "http://quote.yahoo.com/d/quotes.cvs?s=" + currency.toUpperCase() + "=X&f=l1&e=.cvs";
+        String exchangeValue = "";
+
+        try {
+            URL url = new URL(req);
+            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+            exchangeValue = in.readLine();
+            in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return Double.valueOf(exchangeValue);
+    }
+
+    private static boolean isVowel(char c) {
+        return "EIUeiu".indexOf(c) != -1;
+    }
+
+    @Override
+    public void scheduleUpdate(int minutes) {
+        // could have used Quartz as an alternative
+        System.out.println("Updater scheduled to run every " + minutes + " minutes");
+        scheduler.scheduleAtFixedRate(updater, minutes, minutes, TimeUnit.MINUTES);
+    }
+
     @Override
     public String exchangeRate(String sourceCurrency, String targetCurrency, Double amount) {
-        return df.format(currencyExchange.get(sourceCurrency + targetCurrency) * amount);
+        String appendedCurrency = sourceCurrency + targetCurrency;
+        DecimalFormat df = new DecimalFormat("###,###.##");
+
+        if (currencyExchange.containsKey(appendedCurrency))
+            return df.format(currencyExchange.get(appendedCurrency) * amount);
+        else {
+            double value = fetchSingleCurrency(appendedCurrency);
+            currencyExchange.put(appendedCurrency, value);
+            return df.format(value * amount);
+        }
+    }
+
+    @Override
+    public String addCorrectEndLetter(String input) {
+        if (isVowel(input.charAt(input.length() - 1)))
+            return input + "r";
+        else if (input.charAt(input.length() - 1) == 'n')
+            return input;
+        else
+            return input + "s";
     }
 
     @Override
     public String exchangeRate(String sourceCurrency, String targetCurrency) {
-        return df.format(currencyExchange.get(sourceCurrency + targetCurrency));
+        return exchangeRate(sourceCurrency, targetCurrency, 1d);
     }
 
     @Override
     public List<String> getCurrencies() {
-        return currencyCache.getCurrencyList();
+        String splitChar = "\\$";
+        int index = 1;
+        return currencyCache.getCurrencyList()
+                .stream()
+                .sorted((s1, s2) -> s1.split(splitChar)[index].compareTo(s2.split(splitChar)[index]))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean checkValidIntegerInput(String input) {
+        int integerLimit = getCurrencies().size();
+
+        try {
+            Integer.parseInt(input.trim());
+            if (Integer.parseInt(input.trim()) > integerLimit)
+                throw new InputMismatchException("Input a valid number between 1 and " + integerLimit);
+        } catch (NumberFormatException e) {
+            throw new NumberFormatException("Input whole numbers only");
+        }
+        return true;
+    }
+
+    @Override
+    public boolean checkGenericIntegerInput(String input) {
+        try {
+            Integer.parseInt(input.trim());
+        } catch (NumberFormatException e) {
+            throw new NumberFormatException("'" + input.trim() + "' is not valid");
+        }
+        return true;
+    }
+
+    @Override
+    public boolean checkValidDoubleInput(String input) {
+        try {
+            Double.parseDouble(input.trim());
+        } catch (NumberFormatException e) {
+            throw new NumberFormatException("Numbers only and use '.' to specify double values"); // should use a comma instead if possible
+        }
+        return true;
+    }
+
+    @Override
+    public void getClientInfo() throws ServerNotActiveException {
+        // log it instead if a logger was implemented
+        System.err.println("Connected client: " + RemoteServer.getClientHost());
     }
 }
