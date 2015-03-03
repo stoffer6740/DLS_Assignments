@@ -3,15 +3,14 @@ package Server;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.ServerNotActiveException;
-import java.util.InputMismatchException;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by prep on 20-02-2015.
  */
 public interface RmiServer extends Remote {
-    void scheduleUpdate(int minutes) throws RemoteException;
+    void scheduleUpdate(int delay, int period, TimeUnit unit) throws RemoteException;
 
     String exchangeRate(String sourceCurrency, String targetCurrency, Double amount) throws RemoteException;
 

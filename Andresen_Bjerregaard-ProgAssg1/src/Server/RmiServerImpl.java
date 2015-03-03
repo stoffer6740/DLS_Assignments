@@ -98,10 +98,10 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
     }
 
     @Override
-    public void scheduleUpdate(int minutes) {
+    public void scheduleUpdate(int delay, int period, TimeUnit unit) {
         // could have used Quartz as an alternative
-        System.out.println("Updater scheduled to run every " + minutes + " minute(s)");
-        scheduler.scheduleAtFixedRate(updater, minutes, minutes, TimeUnit.MINUTES);
+        System.out.println("Updater scheduled to run every " + period + " minute(s)");
+        scheduler.scheduleAtFixedRate(updater, delay, period, unit);
     }
 
     @Override
