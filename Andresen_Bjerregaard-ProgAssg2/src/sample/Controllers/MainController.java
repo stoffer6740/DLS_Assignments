@@ -97,9 +97,9 @@ public class MainController {
         myComboBoxData.addAll(getCurrencies().stream().map(currency -> currency.split(splitChar)[longIndex]).collect(Collectors.toList()));
 
         cmbSourceCurrency.setItems(myComboBoxData);
-        cmbSourceCurrency.setValue(myComboBoxData.get(0));
+        cmbSourceCurrency.getSelectionModel().selectFirst();
         cmbTargetCurrency.setItems(myComboBoxData);
-        cmbTargetCurrency.setValue(myComboBoxData.get(0));
+        cmbTargetCurrency.getSelectionModel().selectFirst();
     }
 
     private List<String> getCurrencies() {

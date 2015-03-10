@@ -27,6 +27,7 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
     private CurrencyUpdater updater = new CurrencyUpdater();
     private static CurrencyLoader currencyCache = CurrencyLoader.INSTANCE;
     private static HashMap<String, Double> currencyExchange = new HashMap<>();
+    private UpdaterObject updaterSettings;
 
     public RmiServerImpl() throws RemoteException {
         super(0);
@@ -90,9 +91,9 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
     }
 
     @Override
-    public void scheduleUpdate(int delay, int period, TimeUnit unit) {
-        System.out.println("Updater scheduled to run every " + period + " " + unit.toString().toLowerCase());
-        scheduler.scheduleAtFixedRate(updater, delay, period, unit);
+    public void scheduleUpdate(UpdaterObject updaterSettings) {
+        System.out.println("Updater scheduled to run every " + updaterSettings.getPeriod() + " " + updaterSettings.getTimeUnit().toString().toLowerCase());
+        scheduler.scheduleAtFixedRate(updater, updaterSettings.getDelay(), updaterSettings.getPeriod(), updaterSettings.getTimeUnit());
     }
 
     @Override
@@ -117,5 +118,15 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
     public void getClientInfo() throws ServerNotActiveException {
         // log it instead if a logger was implemented
         System.err.println("Connected client: " + RemoteServer.getClientHost());
+    }
+
+    @Override
+    public UpdaterObject getUpdaterSettings() {
+        return this.updaterSettings;
+    }
+
+    @Override
+    public void setUpdaterSettings(UpdaterObject updaterSettings) {
+        this.updaterSettings = updaterSettings;
     }
 }

@@ -10,7 +10,9 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import sample.Server.RmiServer;
+import sample.Server.UpdaterObject;
 
+import javax.management.remote.rmi.RMIServer;
 import java.rmi.RemoteException;
 import java.util.concurrent.TimeUnit;
 
@@ -29,10 +31,16 @@ public class UpdateController {
     private ObservableList<TimeUnit> myComboBoxData = FXCollections.observableArrayList();
     private RmiServer server;
 
-    public void startupConfig(boolean serverAvailability) {
+    public void startupConfig(boolean serverAvailability) throws RemoteException {
         if (serverAvailability)  {
             btnScheduleUpdater.disableProperty().bind(Bindings.isEmpty(txtDelay.textProperty()).or(Bindings.isEmpty(txtPeriod.textProperty())));
             setMyComboBoxData();
+            UpdaterObject updaterSettings = server.getUpdaterSettings();
+            if (updaterSettings != null) {
+                txtDelay.setText(String.valueOf(updaterSettings.getDelay()));
+                txtPeriod.setText(String.valueOf(updaterSettings.getPeriod()));
+                cmbTimeUnit.getSelectionModel().select(updaterSettings.getTimeUnit());
+            }
         } else {
             btnScheduleUpdater.setDisable(true);
         }
@@ -44,7 +52,7 @@ public class UpdateController {
         myComboBoxData.add(TimeUnit.HOURS);
 
         cmbTimeUnit.setItems(myComboBoxData);
-        cmbTimeUnit.setValue(myComboBoxData.get(0));
+        cmbTimeUnit.getSelectionModel().selectFirst();
     }
 
     @FXML
@@ -53,7 +61,13 @@ public class UpdateController {
         int period = Integer.parseInt(txtPeriod.getText());
         TimeUnit timeUnit = cmbTimeUnit.getSelectionModel().getSelectedItem();
 
-        server.scheduleUpdate(delay, period, timeUnit);
+        UpdaterObject updaterSettings = new UpdaterObject()
+                .setDelay(delay)
+                .setPeriod(period)
+                .setTimeUnit(timeUnit);
+        server.setUpdaterSettings(updaterSettings);
+
+        server.scheduleUpdate(updaterSettings);
     }
 
     private void allowOnlyNumbers(KeyEvent event) {
