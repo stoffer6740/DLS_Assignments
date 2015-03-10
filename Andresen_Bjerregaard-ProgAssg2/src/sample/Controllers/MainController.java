@@ -7,6 +7,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.PieChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -36,6 +41,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public class MainController {
@@ -51,6 +57,8 @@ public class MainController {
     private Label lblServerStatus;
     @FXML
     private Button btnSubmit;
+    @FXML
+    private BarChart chartCurrency;
     private static RmiServer server;
     private CurrencyLoader currencyCache = CurrencyLoader.INSTANCE;
     private ObservableList<String> myComboBoxData = FXCollections.observableArrayList();
@@ -58,6 +66,7 @@ public class MainController {
     private int shortIndex = 0;
     private int longIndex = 1;
     private boolean serverStatus;
+    private Random rnd = new Random();
 
     public void startUpConfig() {
         serverStatus = hostAvailabilityCheck();
@@ -81,6 +90,7 @@ public class MainController {
                 server = (RmiServer) Naming.lookup(ServerConfig.SERVER_ADDRESS);
                 lblServerStatus.setText("online");
                 lblServerStatus.setTextFill(Color.GREEN);
+                populateChart();
                 return true;
             } catch (NotBoundException | MalformedURLException | RemoteException e) {
 //                e.printStackTrace();
@@ -181,5 +191,21 @@ public class MainController {
         catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void populateChart() throws RemoteException {
+        chartCurrency.getXAxis().setLabel("Currencies");
+        chartCurrency.getYAxis().setLabel("x per 1 EUR");
+        XYChart.Series seriesDKK = new XYChart.Series();
+
+
+        for (int i = 0; i < 5; i++) {
+            int index = rnd.nextInt(getCurrencies().size());
+            String targetCurrency = getCurrencies().get(index).split(splitChar)[shortIndex];
+            double exchangeRate = server.exchangeRate("EUR", targetCurrency);
+            seriesDKK.getData().add(new XYChart.Data<>(targetCurrency, exchangeRate));
+        }
+
+        chartCurrency.getData().addAll(seriesDKK);
     }
 }

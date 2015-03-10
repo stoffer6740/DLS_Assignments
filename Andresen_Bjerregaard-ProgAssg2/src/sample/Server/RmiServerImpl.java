@@ -13,6 +13,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.server.RemoteServer;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -27,7 +28,7 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
     private CurrencyUpdater updater = new CurrencyUpdater();
     private static CurrencyLoader currencyCache = CurrencyLoader.INSTANCE;
     private static HashMap<String, Double> currencyExchange = new HashMap<>();
-    private UpdaterObject updaterSettings;
+    protected static UpdaterObject updaterSettings = new UpdaterObject();
 
     public RmiServerImpl() throws RemoteException {
         super(0);
@@ -52,6 +53,7 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
         System.out.println("PeerServer bound in registry");
 
         // Fetch currencies from yahoo
+        updaterSettings.setLastUpdated(Calendar.getInstance().getTime());
         System.out.println("Fetching initial currencies...");
         fillCurrencyCache();
         System.out.println("All currencies are up to date");
@@ -90,8 +92,7 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
         return Double.valueOf(exchangeValue);
     }
 
-    @Override
-    public void scheduleUpdate(UpdaterObject updaterSettings) {
+    private void scheduleUpdate(UpdaterObject updaterSettings) {
         System.out.println("Updater scheduled to run every " + updaterSettings.getPeriod() + " " + updaterSettings.getTimeUnit().toString().toLowerCase());
         scheduler.scheduleAtFixedRate(updater, updaterSettings.getDelay(), updaterSettings.getPeriod(), updaterSettings.getTimeUnit());
     }
@@ -122,11 +123,15 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
 
     @Override
     public UpdaterObject getUpdaterSettings() {
-        return this.updaterSettings;
+        return updaterSettings;
     }
 
     @Override
-    public void setUpdaterSettings(UpdaterObject updaterSettings) {
-        this.updaterSettings = updaterSettings;
+    public void setUpdaterSettings(int delay, int period, TimeUnit timeUnit) {
+        updaterSettings.setDelay(delay)
+                    .setPeriod(period)
+                    .setTimeUnit(timeUnit);
+
+        scheduleUpdate(updaterSettings);
     }
 }

@@ -7,6 +7,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import sample.Server.RmiServer;
@@ -28,6 +29,8 @@ public class UpdateController {
     private ComboBox<TimeUnit> cmbTimeUnit;
     @FXML
     private Button btnScheduleUpdater;
+    @FXML
+    private Label lblLastUpdated;
     private ObservableList<TimeUnit> myComboBoxData = FXCollections.observableArrayList();
     private RmiServer server;
 
@@ -36,11 +39,13 @@ public class UpdateController {
             btnScheduleUpdater.disableProperty().bind(Bindings.isEmpty(txtDelay.textProperty()).or(Bindings.isEmpty(txtPeriod.textProperty())));
             setMyComboBoxData();
             UpdaterObject updaterSettings = server.getUpdaterSettings();
-            if (updaterSettings != null) {
-                txtDelay.setText(String.valueOf(updaterSettings.getDelay()));
-                txtPeriod.setText(String.valueOf(updaterSettings.getPeriod()));
+            txtDelay.setText(String.valueOf(updaterSettings.getDelay()));
+            txtPeriod.setText(String.valueOf(updaterSettings.getPeriod()));
+            if (updaterSettings.getTimeUnit() == null)
+                cmbTimeUnit.getSelectionModel().selectFirst();
+            else
                 cmbTimeUnit.getSelectionModel().select(updaterSettings.getTimeUnit());
-            }
+            lblLastUpdated.setText(lblLastUpdated.getText() + updaterSettings.getLastUpdated());
         } else {
             btnScheduleUpdater.setDisable(true);
         }
@@ -52,7 +57,6 @@ public class UpdateController {
         myComboBoxData.add(TimeUnit.HOURS);
 
         cmbTimeUnit.setItems(myComboBoxData);
-        cmbTimeUnit.getSelectionModel().selectFirst();
     }
 
     @FXML
@@ -61,13 +65,7 @@ public class UpdateController {
         int period = Integer.parseInt(txtPeriod.getText());
         TimeUnit timeUnit = cmbTimeUnit.getSelectionModel().getSelectedItem();
 
-        UpdaterObject updaterSettings = new UpdaterObject()
-                .setDelay(delay)
-                .setPeriod(period)
-                .setTimeUnit(timeUnit);
-        server.setUpdaterSettings(updaterSettings);
-
-        server.scheduleUpdate(updaterSettings);
+        server.setUpdaterSettings(delay, period, timeUnit);
     }
 
     private void allowOnlyNumbers(KeyEvent event) {
