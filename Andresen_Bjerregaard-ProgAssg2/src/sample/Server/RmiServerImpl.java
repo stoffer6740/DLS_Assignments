@@ -94,7 +94,7 @@ public class RmiServerImpl extends UnicastRemoteObject implements RmiServer {
 
     @Override
     public void scheduleUpdate(int delay, int period, TimeUnit unit) {
-        System.out.println("Updater scheduled to run every " + period + " " + unit.toString());
+        System.out.println("Updater scheduled to run every " + period + " " + unit.toString().toLowerCase());
         scheduler.scheduleAtFixedRate(updater, delay, period, unit);
     }
 

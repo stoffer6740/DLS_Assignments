@@ -16,7 +16,6 @@ public class Main extends Application {
         Parent root = loader.load();
 
         MainController mainController = loader.getController();
-//        controller.setMyComboBoxData();
         mainController.startUpConfig();
 
         primaryStage.getIcons().add(new Image("coin.png"));

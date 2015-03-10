@@ -4,15 +4,24 @@ import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Group;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import sample.Server.CurrencyLoader;
 import sample.Server.ExchangeRateTask;
 import sample.Server.RmiServer;
@@ -51,10 +60,12 @@ public class MainController {
     private String splitChar = "\\$";
     private int shortIndex = 0;
     private int longIndex = 1;
+    private boolean serverStatus;
 
     public void startUpConfig() {
+        serverStatus = hostAvailabilityCheck();
         // if the server is online
-        if (hostAvailabilityCheck()) {
+        if (serverStatus) {
             // fill the combo boxes with data
             setMyComboBoxData();
             // disable submit button if the amount field is empty
@@ -92,7 +103,6 @@ public class MainController {
         cmbSourceCurrency.setValue(myComboBoxData.get(0));
         cmbTargetCurrency.setItems(myComboBoxData);
         cmbTargetCurrency.setValue(myComboBoxData.get(0));
-        txtAmount.setText("0");
     }
 
     private List<String> getCurrencies() {
@@ -151,5 +161,28 @@ public class MainController {
 
     private static boolean isVowel(char c) {
         return "EIUeiu".indexOf(c) != -1;
+    }
+
+    @FXML
+    public void updaterSettings(ActionEvent actionEvent) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/sample/GUI/updateSettings.fxml"));
+            Parent root = loader.load();
+
+            UpdateController updateController = loader.getController();
+            updateController.setServer(server);
+            updateController.startupConfig(serverStatus);
+
+            Stage primaryStage = new Stage();
+            primaryStage.getIcons().add(new Image("coin.png"));
+            primaryStage.setTitle("Updater settings");
+            primaryStage.initModality(Modality.APPLICATION_MODAL);
+            primaryStage.setScene(new Scene(root, primaryStage.getWidth(), primaryStage.getHeight()));
+            primaryStage.setResizable(false);
+            primaryStage.show();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

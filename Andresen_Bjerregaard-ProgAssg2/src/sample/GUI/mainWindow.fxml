@@ -11,6 +11,15 @@
 
 <VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controllers.MainController">
    <children>
+      <MenuBar>
+        <menus>
+          <Menu mnemonicParsing="false" text="Updater">
+            <items>
+              <MenuItem fx:id="menuConfigureUpdater" mnemonicParsing="false" onAction="#updaterSettings" text="Configure" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
       <HBox>
          <children>
             <Label text="Server status: " />

@@ -30,11 +30,14 @@
             <Label text="Delay" />
             <Label text="Period" GridPane.rowIndex="1" />
             <Label text="Time unit" GridPane.rowIndex="2" />
+            <TextField fx:id="txtDelay" onKeyTyped="#delayTyped" GridPane.columnIndex="1" />
+            <TextField fx:id="txtPeriod" onKeyTyped="#periodTyped" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <ComboBox fx:id="cmbTimeUnit" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
          </children>
       </GridPane>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
          <children>
-            <Button fx:id="btnScheduleUpdater" alignment="CENTER" defaultButton="true" mnemonicParsing="false" text="Schedule updater" />
+            <Button fx:id="btnScheduleUpdater" alignment="CENTER" defaultButton="true" mnemonicParsing="false" onAction="#initializeUpdater" text="Schedule updater" />
          </children>
       </HBox>
    </children>
