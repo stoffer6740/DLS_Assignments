@@ -195,14 +195,17 @@ public class MainController {
 
     private void populateChart() throws RemoteException {
         chartCurrency.getXAxis().setLabel("Currencies");
-        chartCurrency.getYAxis().setLabel("x per 1 EUR");
+
+        String randomSourceCurrency = getCurrencies().get(rnd.nextInt(getCurrencies().size())).split(splitChar)[shortIndex];
+
+        chartCurrency.getYAxis().setLabel("X per 1 " + randomSourceCurrency);
         XYChart.Series seriesDKK = new XYChart.Series();
 
 
         for (int i = 0; i < 5; i++) {
             int index = rnd.nextInt(getCurrencies().size());
             String targetCurrency = getCurrencies().get(index).split(splitChar)[shortIndex];
-            double exchangeRate = server.exchangeRate("EUR", targetCurrency);
+            double exchangeRate = server.exchangeRate(randomSourceCurrency, targetCurrency);
             seriesDKK.getData().add(new XYChart.Data<>(targetCurrency, exchangeRate));
         }
 
